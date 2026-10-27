@@ -4,48 +4,122 @@
 
 :root {
   color-scheme: dark;
+  --bg-base: #080d1a;
+  --bg-surface: #0d152a;
+  --bg-card: #111a33;
+  --bg-card-inner: #0a1122;
+  --border-subtle: #1c2b4c;
+  --border-strong: #273b66;
+  --accent-amber: #f59e0b;
+  --accent-amber-glow: rgba(245, 158, 11, 0.25);
+  --text-primary: #f1f5f9;
+  --text-secondary: #94a3b8;
+  --text-muted: #64748b;
 }
 
 body {
   margin: 0;
-  font-family: 'Inter', 'Geist', -apple-system, BlinkMacSystemFont, sans-serif;
-  background-color: #070b12;
-  color: #e2e8f0;
+  font-family: 'Geist', 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-/* Minimalist Tactical Scrollbar */
+/* Minimalist Industrial Scrollbar */
 ::-webkit-scrollbar {
-  width: 5px;
-  height: 5px;
+  width: 6px;
+  height: 6px;
 }
 ::-webkit-scrollbar-track {
-  background: transparent;
+  background: rgba(8, 13, 26, 0.5);
 }
 ::-webkit-scrollbar-thumb {
-  background: #1c263c;
-  border-radius: 4px;
+  background: #24355a;
+  border-radius: 3px;
 }
 ::-webkit-scrollbar-thumb:hover {
-  background: #2b3a58;
+  background: #374f82;
 }
 
-/* Custom Tactical Card Styles */
+/* Custom Tactical Engineering Card Styles */
 .tactical-card {
-  background-color: #0d1424;
-  border: 1px solid #1c263c;
-  border-radius: 8px;
+  background: linear-gradient(180deg, #101931 0%, #0d1528 100%);
+  border: 1px solid #1c2d4f;
+  border-radius: 10px;
+  box-shadow: 0 4px 16px -2px rgba(2, 6, 23, 0.45);
+  transition: border-color 0.15s ease-in-out;
+}
+
+.tactical-card:hover {
+  border-color: #273d69;
 }
 
 .tactical-inner {
-  background-color: #10182b;
-  border: 1px solid #1a253a;
-  border-radius: 6px;
+  background-color: #0b1122;
+  border: 1px solid #1a2744;
+  border-radius: 8px;
 }
 
-/* Bounding box animation & HUD accents */
+/* Engineered Form Inputs & Selects */
+.eng-input, .eng-select {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border-radius: 6px;
+  background-color: #090f1f;
+  border: 1px solid #1f2f52;
+  font-size: 0.75rem;
+  line-height: 1rem;
+  color: #f8fafc;
+  transition: all 0.15s ease;
+}
+
+.eng-input:focus, .eng-select:focus {
+  outline: none;
+  border-color: #f59e0b;
+  box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.2);
+}
+
+.eng-input::placeholder {
+  color: #64748b;
+}
+
+/* Focus styles for accessibility */
+button:focus-visible, a:focus-visible, input:focus-visible, select:focus-visible, textarea:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px #f59e0b, 0 0 0 4px rgba(245, 158, 11, 0.25);
+}
+
+/* Subtle HUD bounding box animation */
 .hud-box {
   position: absolute;
   pointer-events: none;
-  transition: all 0.2s ease-in-out;
+  transition: all 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+/* Print optimizations for Report / Audit Dossier */
+@media print {
+  body {
+    background: white !important;
+    color: black !important;
+  }
+  header, footer, nav, .no-print {
+    display: none !important;
+  }
+  .tactical-card {
+    background: white !important;
+    border: 1px solid #ccc !important;
+    color: black !important;
+    box-shadow: none !important;
+  }
+}
+
+/* Respect user's motion preference */
+@media (prefers-reduced-motion: reduce) {
+  *, ::before, ::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
 }

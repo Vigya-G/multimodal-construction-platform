@@ -7,7 +7,11 @@ import {
   Image as ImageIcon, 
   ChevronDown, 
   AlertOctagon,
-  RefreshCw
+  RefreshCw,
+  ShieldCheck,
+  HardHat,
+  Crosshair,
+  ExternalLink
 } from 'lucide-react';
 import { analyzeSafetyFile, analyzeSafetyJson } from '../api/client';
 
@@ -86,14 +90,12 @@ function computeLabelPlacements(detections) {
     // Ordered candidate positions
     let candidatePositions;
     if (isPpeChild) {
-      // Hardhat PPE: anchor to the right of the head box so it never covers the worker's face or chin
       candidatePositions = [
         { name: 'right', topOffset: y, className: 'top-0 left-full ml-1.5' },
         { name: 'inside-bottom', topOffset: y + h - labelH - 0.005, className: 'bottom-0.5 right-0.5' },
         { name: 'below', topOffset: y + h + 0.005, className: 'top-full mt-1 left-0' },
       ];
     } else {
-      // Parent/hazard/worker labels prefer above, then below, then inside-top, respecting alignRight
       candidatePositions = [
         { 
           name: 'above', 
@@ -202,7 +204,6 @@ export default function SafetyInspector({ uiState = 'results', onUpdateReport })
   const [imageSrc, setImageSrc] = useState('/scaffold_sample.jpg');
   const [uploadedFile, setUploadedFile] = useState(null);
 
-  // Bug 5 fix: Default all targets to checked
   const [targets, setTargets] = useState({
     fallArrest: true,
     guardrails: true,
@@ -210,7 +211,6 @@ export default function SafetyInspector({ uiState = 'results', onUpdateReport })
     plankDeflection: true,
   });
 
-  // Server-derived audit findings
   const [data, setData] = useState({
     hazard_score: 84,
     fall_risk_pct: 88,
@@ -225,7 +225,6 @@ export default function SafetyInspector({ uiState = 'results', onUpdateReport })
 
   const [loading, setLoading] = useState(false);
 
-  // Listen to top-level "Run Safety Audit" event from Navbar
   useEffect(() => {
     const runListener = () => handleRunAudit();
     const demoListener = () => handleDemoData();
@@ -306,66 +305,62 @@ export default function SafetyInspector({ uiState = 'results', onUpdateReport })
 
   const [hoveredDetId, setHoveredDetId] = useState(null);
 
-  // Severity style helper with high-contrast text and shadows
   const getBoxStyle = (severity, isHovered) => {
     const hoverGlow = isHovered 
-      ? 'ring-2 ring-white/70 shadow-xl shadow-black/80 z-30 brightness-110' 
+      ? 'ring-2 ring-white/90 shadow-2xl shadow-black/90 z-30 brightness-110' 
       : 'z-10';
 
     switch (severity) {
       case 'Critical':
         return {
-          border: `border-2 border-rose-500 bg-rose-500/10 ${hoverGlow}`,
-          badge: 'bg-rose-600/95 text-white font-mono text-[11px] font-bold px-1.5 py-0.5 rounded-[2px] shadow-[0_2px_4px_rgba(0,0,0,0.85)] border border-rose-400/40 tracking-tight backdrop-blur-sm',
+          border: `border-2 border-rose-500 bg-rose-500/15 ${hoverGlow}`,
+          badge: 'bg-rose-600 text-white font-mono text-[11px] font-bold px-2 py-0.5 rounded shadow-lg border border-rose-400/50 tracking-tight backdrop-blur-md',
         };
       case 'High':
         return {
-          border: `border-2 border-orange-500 bg-orange-500/10 ${hoverGlow}`,
-          badge: 'bg-orange-600/95 text-white font-mono text-[11px] font-bold px-1.5 py-0.5 rounded-[2px] shadow-[0_2px_4px_rgba(0,0,0,0.85)] border border-orange-400/40 tracking-tight backdrop-blur-sm',
+          border: `border-2 border-orange-500 bg-orange-500/15 ${hoverGlow}`,
+          badge: 'bg-orange-600 text-white font-mono text-[11px] font-bold px-2 py-0.5 rounded shadow-lg border border-orange-400/50 tracking-tight backdrop-blur-md',
         };
       case 'Moderate':
         return {
-          border: `border-2 border-amber-400 bg-amber-400/10 ${hoverGlow}`,
-          // High contrast: deep black font on vivid yellow with dark drop-shadow to stand out over sky
-          badge: 'bg-[#facc15] text-zinc-950 font-mono text-[11px] font-bold px-1.5 py-0.5 rounded-[2px] shadow-[0_2px_4px_rgba(0,0,0,0.85)] border border-amber-500/80 tracking-tight drop-shadow-sm',
+          border: `border-2 border-amber-400 bg-amber-400/15 ${hoverGlow}`,
+          badge: 'bg-amber-400 text-slate-950 font-mono text-[11px] font-bold px-2 py-0.5 rounded shadow-lg border border-amber-500 tracking-tight',
         };
       case 'Unverified':
         return {
-          border: `border-2 border-dashed border-slate-400/80 bg-slate-500/10 ${hoverGlow}`,
-          badge: 'bg-[#182234]/95 text-zinc-300 font-mono text-[11px] font-semibold px-1.5 py-0.5 rounded-[2px] shadow-[0_2px_4px_rgba(0,0,0,0.8)] border border-[#2d3e5f] tracking-tight backdrop-blur-sm',
+          border: `border-2 border-dashed border-slate-400/80 bg-slate-500/15 ${hoverGlow}`,
+          badge: 'bg-slate-800 text-slate-200 font-mono text-[11px] font-semibold px-2 py-0.5 rounded shadow-lg border border-slate-600 tracking-tight backdrop-blur-md',
         };
       default:
         return {
-          border: `border-2 border-emerald-400 bg-emerald-400/10 ${hoverGlow}`,
-          badge: 'bg-emerald-600/95 text-white font-mono text-[11px] font-bold px-1.5 py-0.5 rounded-[2px] shadow-[0_2px_4px_rgba(0,0,0,0.85)] border border-emerald-400/40 tracking-tight backdrop-blur-sm',
+          border: `border-2 border-emerald-400 bg-emerald-400/15 ${hoverGlow}`,
+          badge: 'bg-emerald-600 text-white font-mono text-[11px] font-bold px-2 py-0.5 rounded shadow-lg border border-emerald-400/50 tracking-tight backdrop-blur-md',
         };
     }
   };
 
-  // Single detections array only
   const activeDetections = (uiState === 'results' && !loading) ? (data.detections || []) : [];
-
-  // Collision-free label placements computed deterministically
   const labelPlacements = computeLabelPlacements(activeDetections);
-
-  // Derived counts from single detections array
   const activeWorkersCount = activeDetections.filter(d => d.type === 'worker').length || data.workers_detected || 2;
   const activeHazardsCount = activeDetections.filter(d => d.severity in { Critical: 1, High: 1, Moderate: 1 }).length || data.hazards_count || 2;
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 text-zinc-200">
+    <div className="grid grid-cols-1 lg:grid-cols-12 gap-5 text-slate-200">
       {/* ================= LEFT COLUMN (4 / 12) ================= */}
       <div className="lg:col-span-4 space-y-4">
         {/* Card 1: Site Imagery Ingestion */}
         <div className="tactical-card p-4 space-y-4">
-          <div className="flex items-center justify-between">
+          <div className="flex items-center justify-between pb-2 border-b border-[#1c2d4f]">
             <div className="flex items-center space-x-2">
-              <span className="w-2 h-2 rounded-full bg-[#eab308]"></span>
-              <span className="font-semibold text-xs tracking-wide text-white uppercase">Site Imagery Ingestion</span>
+              <span className="w-2 h-2 rounded-full bg-amber-400"></span>
+              <span className="font-semibold text-xs tracking-wider text-slate-100 uppercase font-mono">
+                Site Imagery Ingestion
+              </span>
             </div>
             <button
+              type="button"
               onClick={handleDemoData}
-              className="px-2.5 py-1 rounded bg-[#131d31] hover:bg-[#1a2742] text-[#8b9bb4] hover:text-white text-[11px] font-medium border border-[#223354] transition cursor-pointer"
+              className="px-2.5 py-1 rounded bg-[#0e172a] hover:bg-[#16233d] text-slate-300 hover:text-white text-[11px] font-medium border border-[#223558] transition duration-150 cursor-pointer shadow-sm"
             >
               Demo Data
             </button>
@@ -374,7 +369,7 @@ export default function SafetyInspector({ uiState = 'results', onUpdateReport })
           {/* Upload Area */}
           <div
             onClick={() => document.getElementById('file-upload-input').click()}
-            className="border border-dashed border-[#243555] hover:border-[#3b5380] rounded-lg p-5 flex flex-col items-center justify-center cursor-pointer transition bg-[#0b101d]/60"
+            className="border-2 border-dashed border-[#243962] hover:border-amber-400/60 rounded-xl p-5 flex flex-col items-center justify-center cursor-pointer transition duration-150 bg-[#090f1f]/80 group"
           >
             <input
               id="file-upload-input"
@@ -383,23 +378,25 @@ export default function SafetyInspector({ uiState = 'results', onUpdateReport })
               className="hidden"
               onChange={handleFileUpload}
             />
-            <div className="w-9 h-9 rounded-full bg-[#131d31] flex items-center justify-center text-zinc-400 mb-2">
-              <UploadCloud className="w-4 h-4 text-zinc-300" />
+            <div className="w-10 h-10 rounded-full bg-[#121d38] group-hover:bg-[#19284d] flex items-center justify-center text-slate-400 group-hover:text-amber-400 transition mb-2.5 border border-[#203259]">
+              <UploadCloud className="w-5 h-5" />
             </div>
             <div className="text-xs text-center font-medium">
-              <span className="text-[#eab308]">Click to upload</span>
-              <span className="text-zinc-400"> or drag site image</span>
+              <span className="text-amber-400 group-hover:underline">Click to upload</span>
+              <span className="text-slate-400"> or drag site image</span>
             </div>
-            <p className="text-[11px] text-zinc-500 mt-1">JPEG, PNG, WebP up to 25MB</p>
+            <p className="text-[11px] text-slate-500 mt-1">JPEG, PNG, WebP up to 25MB</p>
 
             {/* Active File Pill */}
             {imageFileName && (
-              <div className="mt-3 px-3 py-1.5 rounded-md bg-[#0f1a2e] border border-[#1e2f4f] text-[11px] text-zinc-300 flex items-center space-x-2 w-full justify-between">
-                <div className="flex items-center space-x-1.5 truncate">
-                  <Check className="w-3.5 h-3.5 text-emerald-400 shrink-0" />
-                  <span className="truncate">{imageFileName}</span>
+              <div className="mt-3 px-3 py-1.5 rounded-lg bg-[#0e172a] border border-[#203358] text-[11px] text-slate-200 flex items-center space-x-2 w-full justify-between shadow-inner">
+                <div className="flex items-center space-x-2 truncate">
+                  <span className="w-4 h-4 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+                    <Check className="w-2.5 h-2.5 stroke-[3]" />
+                  </span>
+                  <span className="truncate font-medium">{imageFileName}</span>
                 </div>
-                <span className="text-zinc-500 font-mono text-[10px] shrink-0">({fileSizeStr})</span>
+                <span className="text-slate-400 font-mono text-[10px] shrink-0">({fileSizeStr})</span>
               </div>
             )}
           </div>
@@ -407,89 +404,89 @@ export default function SafetyInspector({ uiState = 'results', onUpdateReport })
           {/* Project & Zone Inputs */}
           <div className="space-y-3 pt-1">
             <div>
-              <label className="text-[11px] text-zinc-400 block mb-1">Project / Structure Name</label>
+              <label className="text-[11px] font-medium text-slate-400 block mb-1">Project / Structure Name</label>
               <input
                 type="text"
                 value={projectName}
                 onChange={(e) => setProjectName(e.target.value)}
-                className="w-full px-3 py-2 rounded bg-[#0b101d] border border-[#1e2a42] text-xs text-white focus:outline-none focus:border-[#3b5380] transition"
+                className="eng-input"
               />
             </div>
             <div>
-              <label className="text-[11px] text-zinc-400 block mb-1">Site Work Zone</label>
+              <label className="text-[11px] font-medium text-slate-400 block mb-1">Site Work Zone</label>
               <input
                 type="text"
                 value={siteZone}
                 onChange={(e) => setSiteZone(e.target.value)}
-                className="w-full px-3 py-2 rounded bg-[#0b101d] border border-[#1e2a42] text-xs text-white focus:outline-none focus:border-[#3b5380] transition"
+                className="eng-input"
               />
             </div>
           </div>
 
-          {/* OSHA Verification Targets Checklist (Bug 5: Defaults to all checked) */}
-          <div className="space-y-2 pt-2">
-            <span className="text-[10px] font-semibold tracking-wider text-zinc-400 uppercase block font-mono">
+          {/* OSHA Verification Targets Checklist */}
+          <div className="space-y-2 pt-2 border-t border-[#1c2d4f]">
+            <span className="text-[10px] font-semibold tracking-wider text-slate-400 uppercase block font-mono">
               OSHA VERIFICATION TARGETS
             </span>
 
             <div className="space-y-1.5">
               <div
                 onClick={() => toggleTarget('fallArrest')}
-                className="p-2.5 rounded bg-[#0b101d] border border-[#1e2a42] flex items-start space-x-2.5 cursor-pointer hover:border-[#2b3a58] transition"
+                className="p-2.5 rounded-lg bg-[#090f1f] border border-[#1e2f54] hover:border-[#2e477e] flex items-start space-x-2.5 cursor-pointer transition select-none"
               >
-                <div className={`w-4 h-4 rounded flex items-center justify-center shrink-0 mt-0.5 ${
-                  targets.fallArrest ? 'bg-[#eab308] text-black' : 'border border-zinc-600'
+                <div className={`w-4 h-4 rounded flex items-center justify-center shrink-0 mt-0.5 transition ${
+                  targets.fallArrest ? 'bg-amber-500 text-slate-950 font-bold shadow-sm' : 'border border-slate-600 bg-transparent'
                 }`}>
                   {targets.fallArrest && <Check className="w-3 h-3 stroke-[3]" />}
                 </div>
                 <div>
-                  <span className="text-xs font-medium text-white block">Worker Fall Arrest & Tie-Off</span>
-                  <span className="text-[11px] font-mono text-zinc-500">OSHA 1926.501(b)(1) 6ft threshold</span>
+                  <span className="text-xs font-semibold text-slate-200 block">Worker Fall Arrest &amp; Tie-Off</span>
+                  <span className="text-[11px] font-mono text-slate-400">OSHA 1926.501(b)(1) 6ft threshold</span>
                 </div>
               </div>
 
               <div
                 onClick={() => toggleTarget('guardrails')}
-                className="p-2.5 rounded bg-[#0b101d] border border-[#1e2a42] flex items-start space-x-2.5 cursor-pointer hover:border-[#2b3a58] transition"
+                className="p-2.5 rounded-lg bg-[#090f1f] border border-[#1e2f54] hover:border-[#2e477e] flex items-start space-x-2.5 cursor-pointer transition select-none"
               >
-                <div className={`w-4 h-4 rounded flex items-center justify-center shrink-0 mt-0.5 ${
-                  targets.guardrails ? 'bg-[#eab308] text-black' : 'border border-zinc-600'
+                <div className={`w-4 h-4 rounded flex items-center justify-center shrink-0 mt-0.5 transition ${
+                  targets.guardrails ? 'bg-amber-500 text-slate-950 font-bold shadow-sm' : 'border border-slate-600 bg-transparent'
                 }`}>
                   {targets.guardrails && <Check className="w-3 h-3 stroke-[3]" />}
                 </div>
                 <div>
-                  <span className="text-xs font-medium text-white block">Guardrails, Mid-rails & Toe-boards</span>
-                  <span className="text-[11px] font-mono text-zinc-500">OSHA 1926.451(g)(1) perimeter integrity</span>
+                  <span className="text-xs font-semibold text-slate-200 block">Guardrails, Mid-rails &amp; Toe-boards</span>
+                  <span className="text-[11px] font-mono text-slate-400">OSHA 1926.451(g)(1) perimeter integrity</span>
                 </div>
               </div>
 
               <div
                 onClick={() => toggleTarget('ppe')}
-                className="p-2.5 rounded bg-[#0b101d] border border-[#1e2a42] flex items-start space-x-2.5 cursor-pointer hover:border-[#2b3a58] transition"
+                className="p-2.5 rounded-lg bg-[#090f1f] border border-[#1e2f54] hover:border-[#2e477e] flex items-start space-x-2.5 cursor-pointer transition select-none"
               >
-                <div className={`w-4 h-4 rounded flex items-center justify-center shrink-0 mt-0.5 ${
-                  targets.ppe ? 'bg-[#eab308] text-black' : 'border border-zinc-600'
+                <div className={`w-4 h-4 rounded flex items-center justify-center shrink-0 mt-0.5 transition ${
+                  targets.ppe ? 'bg-amber-500 text-slate-950 font-bold shadow-sm' : 'border border-slate-600 bg-transparent'
                 }`}>
                   {targets.ppe && <Check className="w-3 h-3 stroke-[3]" />}
                 </div>
                 <div>
-                  <span className="text-xs font-medium text-white block">Hardhat & High-Visibility PPE</span>
-                  <span className="text-[11px] font-mono text-zinc-500">OSHA 1926.100 & ANSI/ISEA 107</span>
+                  <span className="text-xs font-semibold text-slate-200 block">Hardhat &amp; High-Visibility PPE</span>
+                  <span className="text-[11px] font-mono text-slate-400">OSHA 1926.100 &amp; ANSI/ISEA 107</span>
                 </div>
               </div>
 
               <div
                 onClick={() => toggleTarget('plankDeflection')}
-                className="p-2.5 rounded bg-[#0b101d] border border-[#1e2a42] flex items-start space-x-2.5 cursor-pointer hover:border-[#2b3a58] transition"
+                className="p-2.5 rounded-lg bg-[#090f1f] border border-[#1e2f54] hover:border-[#2e477e] flex items-start space-x-2.5 cursor-pointer transition select-none"
               >
-                <div className={`w-4 h-4 rounded flex items-center justify-center shrink-0 mt-0.5 ${
-                  targets.plankDeflection ? 'bg-[#eab308] text-black' : 'border border-zinc-600'
+                <div className={`w-4 h-4 rounded flex items-center justify-center shrink-0 mt-0.5 transition ${
+                  targets.plankDeflection ? 'bg-amber-500 text-slate-950 font-bold shadow-sm' : 'border border-slate-600 bg-transparent'
                 }`}>
                   {targets.plankDeflection && <Check className="w-3 h-3 stroke-[3]" />}
                 </div>
                 <div>
-                  <span className="text-xs font-medium text-white block">Scaffold Plank Deflection & Locking Pins</span>
-                  <span className="text-[11px] font-mono text-zinc-500">OSHA 1926.451(a) structural load limit</span>
+                  <span className="text-xs font-semibold text-slate-200 block">Scaffold Plank Deflection &amp; Locking Pins</span>
+                  <span className="text-[11px] font-mono text-slate-400">OSHA 1926.451(a) structural load limit</span>
                 </div>
               </div>
             </div>
@@ -498,41 +495,41 @@ export default function SafetyInspector({ uiState = 'results', onUpdateReport })
 
         {/* Card 2: Recent Audits */}
         <div className="tactical-card p-4 space-y-3">
-          <div className="flex items-center justify-between text-xs pb-1 border-b border-[#1c263c]">
-            <div className="flex items-center space-x-2 text-zinc-300">
-              <Clock className="w-3.5 h-3.5 text-[#eab308]" />
-              <span className="font-semibold tracking-wide uppercase text-[11px] font-mono">RECENT AUDITS</span>
+          <div className="flex items-center justify-between pb-2 border-b border-[#1c2d4f]">
+            <div className="flex items-center space-x-2 text-slate-200">
+              <Clock className="w-3.5 h-3.5 text-amber-400" />
+              <span className="font-semibold tracking-wider uppercase text-[11px] font-mono">Recent Audits</span>
             </div>
-            <span className="text-zinc-500 text-[11px]">Last 3 audits</span>
+            <span className="text-slate-400 text-[11px] font-mono">Last 3 audits</span>
           </div>
 
           <div className="space-y-2">
-            <div className="p-2.5 rounded bg-[#0b101d] border border-[#1e2a42] flex items-center justify-between">
+            <div className="p-2.5 rounded-lg bg-[#090f1f] border border-[#1e2f54] flex items-center justify-between">
               <div>
-                <span className="text-xs font-medium text-white block">Skyline Heights Tower B</span>
-                <span className="text-[10px] text-zinc-500">Today, 14:32</span>
+                <span className="text-xs font-semibold text-slate-200 block">Skyline Heights Tower B</span>
+                <span className="text-[10px] text-slate-400 font-mono">Today, 14:32</span>
               </div>
-              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-rose-500/15 text-rose-400 border border-rose-500/30">
+              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-rose-500/15 text-rose-300 border border-rose-500/30">
                 84 FAIL
               </span>
             </div>
 
-            <div className="p-2.5 rounded bg-[#0b101d] border border-[#1e2a42] flex items-center justify-between">
+            <div className="p-2.5 rounded-lg bg-[#090f1f] border border-[#1e2f54] flex items-center justify-between">
               <div>
-                <span className="text-xs font-medium text-white block">Hudson Yards Core C</span>
-                <span className="text-[10px] text-zinc-500">Yesterday</span>
+                <span className="text-xs font-semibold text-slate-200 block">Hudson Yards Core C</span>
+                <span className="text-[10px] text-slate-400 font-mono">Yesterday</span>
               </div>
-              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-400 border border-emerald-500/30">
+              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-emerald-500/15 text-emerald-300 border border-emerald-500/30">
                 22 PASS
               </span>
             </div>
 
-            <div className="p-2.5 rounded bg-[#0b101d] border border-[#1e2a42] flex items-center justify-between">
+            <div className="p-2.5 rounded-lg bg-[#090f1f] border border-[#1e2f54] flex items-center justify-between">
               <div>
-                <span className="text-xs font-medium text-white block">Pacific Bay Pier 14</span>
-                <span className="text-[10px] text-zinc-500">2 days ago</span>
+                <span className="text-xs font-semibold text-slate-200 block">Pacific Bay Pier 14</span>
+                <span className="text-[10px] text-slate-400 font-mono">2 days ago</span>
               </div>
-              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-amber-500/15 text-amber-400 border border-amber-500/30">
+              <span className="text-[10px] font-mono font-bold px-2 py-0.5 rounded bg-amber-500/15 text-amber-300 border border-amber-500/30">
                 68 MODERATE
               </span>
             </div>
@@ -545,20 +542,20 @@ export default function SafetyInspector({ uiState = 'results', onUpdateReport })
         {/* Main Vision Display Card */}
         <div className="tactical-card overflow-hidden">
           {/* Header Bar */}
-          <div className="px-4 py-2.5 bg-[#0a0f1d] border-b border-[#1c263c] flex items-center justify-between text-xs">
-            <div className="flex items-center space-x-2 text-zinc-300">
-              <ImageIcon className="w-3.5 h-3.5 text-[#eab308]" />
-              <span className="font-mono text-[11px] text-zinc-200">{imageFileName}</span>
+          <div className="px-4 py-2.5 bg-[#090f1f] border-b border-[#1c2d4f] flex flex-wrap items-center justify-between text-xs gap-2">
+            <div className="flex items-center space-x-2 text-slate-200">
+              <ImageIcon className="w-3.5 h-3.5 text-amber-400" />
+              <span className="font-mono text-[11px] font-medium text-slate-100">{imageFileName}</span>
             </div>
-            <div className="font-mono text-[11px] text-zinc-400">
-              <span>3840 × 2160</span>
-              <span className="mx-2">•</span>
+            <div className="font-mono text-[11px] text-slate-400 flex items-center space-x-2">
+              <span className="px-1.5 py-0.5 rounded bg-[#131d36] border border-[#203258]">3840 &times; 2160 UHD</span>
+              <span className="text-slate-600">&bull;</span>
               <span>Analyzed: 14:32:08 UTC</span>
             </div>
           </div>
 
-          {/* Bug 3 fix: position: relative container tightly wrapping the image */}
-          <div className="relative w-full overflow-hidden select-none bg-black">
+          {/* Image Container */}
+          <div className="relative w-full overflow-hidden select-none bg-slate-950">
             <img
               src={imageSrc}
               alt="Site Inspection Scan"
@@ -571,7 +568,6 @@ export default function SafetyInspector({ uiState = 'results', onUpdateReport })
               const style = getBoxStyle(det.severity, isHovered);
               const placementClass = labelPlacements[det.id] || '-top-6 left-0';
               
-              // Concise labels: nested parts (hardhat) use short label without %, distant worker notes unverified
               const labelText = det.type === 'ppe'
                 ? `${det.label} • ${det.severity}`
                 : det.severity === 'Unverified'
@@ -600,18 +596,18 @@ export default function SafetyInspector({ uiState = 'results', onUpdateReport })
 
                   {/* Interactive Finding Tooltip on Hover */}
                   {isHovered && (
-                    <div className="absolute top-full mt-2 left-0 z-40 w-64 p-2.5 rounded bg-[#0b101d]/95 backdrop-blur-md border border-[#2b3d63] shadow-2xl text-[11px] text-zinc-200 pointer-events-none space-y-1">
-                      <div className="flex items-center justify-between font-mono font-bold">
+                    <div className="absolute top-full mt-2 left-0 z-40 w-72 p-3 rounded-lg bg-[#080e1e]/95 backdrop-blur-md border border-[#2a4175] shadow-2xl text-[11px] text-slate-100 pointer-events-none space-y-1.5">
+                      <div className="flex items-center justify-between font-mono font-bold border-b border-[#1c2d4f] pb-1">
                         <span className={
                           det.severity === 'Critical' ? 'text-rose-400' :
-                          det.severity === 'Moderate' ? 'text-[#eab308]' :
-                          det.severity === 'Unverified' ? 'text-zinc-400' : 'text-emerald-400'
+                          det.severity === 'Moderate' ? 'text-amber-400' :
+                          det.severity === 'Unverified' ? 'text-slate-300' : 'text-emerald-400'
                         }>
                           {det.label}
                         </span>
-                        <span className="text-[10px] text-zinc-400">{Math.round(det.confidence * 100)}% Conf.</span>
+                        <span className="text-[10px] text-slate-400 font-mono">{Math.round(det.confidence * 100)}% Conf.</span>
                       </div>
-                      <p className="text-zinc-300 text-[10px] leading-tight font-sans">
+                      <p className="text-slate-300 text-[11px] leading-relaxed font-sans">
                         {det.description || "Active object detection identified by OSHA vision inference."}
                       </p>
                     </div>
@@ -622,37 +618,46 @@ export default function SafetyInspector({ uiState = 'results', onUpdateReport })
 
             {/* Loading Overlay */}
             {(loading || uiState === 'loading') && (
-              <div className="absolute inset-0 bg-black/80 backdrop-blur-sm flex flex-col items-center justify-center space-y-3 z-20">
-                <RefreshCw className="w-8 h-8 text-[#eab308] animate-spin" />
-                <span className="text-xs font-mono text-zinc-300">Executing OSHA 1926 Multimodal Vision Inference...</span>
+              <div className="absolute inset-0 bg-slate-950/85 backdrop-blur-sm flex flex-col items-center justify-center space-y-3 z-20">
+                <div className="w-12 h-12 rounded-xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center">
+                  <RefreshCw className="w-6 h-6 text-amber-400 animate-spin" />
+                </div>
+                <div className="text-center space-y-1">
+                  <span className="text-xs font-mono font-bold text-slate-100 block">EXECUTING MULTIMODAL VISION INFERENCE</span>
+                  <span className="text-[11px] text-slate-400">Evaluating OSHA 1926 fall hazards &amp; perimeter safety bounds...</span>
+                </div>
               </div>
             )}
 
             {/* Error Overlay */}
             {uiState === 'error' && (
-              <div className="absolute inset-0 bg-black/85 flex flex-col items-center justify-center space-y-2 p-6 text-center z-20">
-                <AlertOctagon className="w-8 h-8 text-rose-500" />
-                <span className="text-sm font-semibold text-white">Inspection Scan Interrupted</span>
-                <span className="text-xs text-zinc-400 max-w-sm">Failed to connect to multimodal inference endpoint. Please verify payload formatting or network access.</span>
+              <div className="absolute inset-0 bg-slate-950/90 flex flex-col items-center justify-center space-y-2 p-6 text-center z-20">
+                <div className="w-12 h-12 rounded-xl bg-rose-500/10 border border-rose-500/30 flex items-center justify-center">
+                  <AlertOctagon className="w-6 h-6 text-rose-400" />
+                </div>
+                <span className="text-sm font-semibold text-slate-100">Inspection Scan Interrupted</span>
+                <span className="text-xs text-slate-400 max-w-sm">Failed to connect to multimodal inference endpoint. Please verify payload formatting or network access.</span>
               </div>
             )}
 
             {/* Empty Overlay */}
             {uiState === 'empty' && (
-              <div className="absolute inset-0 bg-black/85 flex flex-col items-center justify-center space-y-2 p-6 text-center z-20">
-                <UploadCloud className="w-8 h-8 text-zinc-500" />
-                <span className="text-sm font-semibold text-white">No Imagery Loaded</span>
-                <span className="text-xs text-zinc-400 max-w-sm">Upload a construction site photograph or click "Demo Data" on the left to start.</span>
+              <div className="absolute inset-0 bg-slate-950/90 flex flex-col items-center justify-center space-y-2 p-6 text-center z-20">
+                <div className="w-12 h-12 rounded-xl bg-slate-800/40 border border-slate-700/50 flex items-center justify-center">
+                  <UploadCloud className="w-6 h-6 text-slate-400" />
+                </div>
+                <span className="text-sm font-semibold text-slate-100">No Imagery Loaded</span>
+                <span className="text-xs text-slate-400 max-w-sm">Upload a construction site photograph or click "Demo Data" on the left to start.</span>
               </div>
             )}
           </div>
 
-          {/* Bottom Detection Stats Strip - Derived from detections */}
-          <div className="px-4 pt-2.5 pb-[18px] bg-[#0a0f1d] border-t border-[#1c263c] flex flex-wrap items-center justify-between text-xs font-medium">
-            <div className="flex flex-wrap items-center gap-6">
+          {/* Bottom Detection Stats Strip */}
+          <div className="px-4 py-3 bg-[#090f1f] border-t border-[#1c2d4f] flex flex-wrap items-center justify-between text-xs gap-3">
+            <div className="flex flex-wrap items-center gap-4 sm:gap-6">
               <div className="flex items-center space-x-2">
-                <span className="text-zinc-400">Workers Detected:</span>
-                <span className="px-2 py-0.5 rounded bg-[#131d31] border border-[#20304f] font-mono text-[11px] text-white">
+                <span className="text-slate-400 font-medium">Workers:</span>
+                <span className="px-2 py-0.5 rounded bg-[#101b33] border border-[#21345d] font-mono text-[11px] font-bold text-slate-100">
                   {activeWorkersCount} Active
                 </span>
               </div>
@@ -661,26 +666,26 @@ export default function SafetyInspector({ uiState = 'results', onUpdateReport })
                 className="flex items-center space-x-2 cursor-help"
                 title="OSHA 1926.100 PPE Compliant: Hardhat & high-vis verified on assessable worker. Missing tie-off is tracked under Fall Protection (OSHA 1926.501). Worker 2 is distant/unverified."
               >
-                <span className="text-zinc-400">PPE Compliance:</span>
+                <span className="text-slate-400 font-medium">PPE Compliance:</span>
                 <span className={`px-2 py-0.5 rounded font-mono text-[11px] font-bold ${
                   data.ppe_compliance_pct === 100
                     ? 'bg-emerald-500/15 border border-emerald-500/30 text-emerald-400'
-                    : 'bg-amber-500/15 border border-amber-500/30 text-[#fde047]'
+                    : 'bg-amber-500/15 border border-amber-500/30 text-amber-300'
                 }`}>
                   {data.ppe_compliance_pct}% {data.ppe_compliance_pct === 100 ? 'Pass' : 'Warning'}
                 </span>
-                <span className="text-[10px] text-zinc-500 font-mono hidden sm:inline">(1 of 1 assessable, 1 unverified)</span>
+                <span className="text-[10px] text-slate-400 font-mono hidden sm:inline">(1 of 1 assessable, 1 unverified)</span>
               </div>
 
               <div className="flex items-center space-x-2">
-                <span className="text-zinc-400">Hazards Found:</span>
-                <span className="px-2 py-0.5 rounded bg-rose-500/15 border border-rose-500/30 font-mono text-[11px] text-rose-400">
-                  {activeHazardsCount} Detected
+                <span className="text-slate-400 font-medium">Hazards:</span>
+                <span className="px-2 py-0.5 rounded bg-rose-500/15 border border-rose-500/30 font-mono text-[11px] font-bold text-rose-400">
+                  {activeHazardsCount} Flagged
                 </span>
               </div>
             </div>
 
-            <span className="text-[10px] text-zinc-500 font-mono hidden md:inline">Hover box or infraction for details</span>
+            <span className="text-[11px] text-slate-400 font-mono hidden md:inline">Hover box or infraction for details</span>
           </div>
         </div>
 
@@ -689,47 +694,47 @@ export default function SafetyInspector({ uiState = 'results', onUpdateReport })
           {/* Card A: TOTAL HAZARD RISK SCORE */}
           <div className="md:col-span-5 tactical-card p-4 space-y-3 flex flex-col justify-between">
             <div>
-              <div className="flex items-center justify-between">
-                <span className="font-semibold text-xs tracking-wider text-zinc-300 uppercase font-mono">
+              <div className="flex items-center justify-between pb-2 border-b border-[#1c2d4f]">
+                <span className="font-semibold text-xs tracking-wider text-slate-200 uppercase font-mono">
                   TOTAL HAZARD RISK SCORE
                 </span>
-                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-rose-500/20 text-rose-400 border border-rose-500/40">
+                <span className="px-2 py-0.5 rounded text-[10px] font-mono font-bold bg-rose-500/20 text-rose-300 border border-rose-500/40">
                   FAIL
                 </span>
               </div>
 
-              {/* Big Score */}
-              <div className="flex items-baseline space-x-2 mt-2">
-                <span className="text-4xl font-extrabold font-mono text-rose-500 tracking-tight">
+              {/* Big Score Readout */}
+              <div className="flex items-baseline space-x-2 mt-3">
+                <span className="text-4xl font-extrabold font-mono text-rose-400 tracking-tight">
                   {data.hazard_score}
                 </span>
-                <span className="text-xs font-mono text-zinc-400">/ 100 Risk Index</span>
+                <span className="text-xs font-mono text-slate-400">/ 100 Risk Index</span>
               </div>
 
-              <p className="text-xs text-rose-300/80 leading-relaxed mt-2">
+              <p className="text-xs text-rose-200/90 leading-relaxed mt-2.5">
                 High Severity Fall Risk detected. Immediate supervisor intervention required prior to continued work.
               </p>
             </div>
 
-            {/* Progress Bars (Bug 6 & 7 fix: Demo switcher removed from inside card, bars derived from response) */}
-            <div className="space-y-3 pt-2 border-t border-[#1c263c]">
-              <div className="space-y-1">
+            {/* Progress Bars */}
+            <div className="space-y-3 pt-3 border-t border-[#1c2d4f]">
+              <div className="space-y-1.5">
                 <div className="flex justify-between text-[11px] font-mono">
-                  <span className="text-zinc-400">Fall Risk</span>
+                  <span className="text-slate-400">Fall Risk</span>
                   <span className="text-rose-400 font-bold">{data.fall_risk_pct}%</span>
                 </div>
-                <div className="w-full h-1.5 bg-[#141d30] rounded-full overflow-hidden">
-                  <div className="h-full bg-rose-500 rounded-full" style={{ width: `${data.fall_risk_pct}%` }}></div>
+                <div className="w-full h-2 bg-[#090f1f] rounded-full overflow-hidden border border-[#1b2b4d]">
+                  <div className="h-full bg-gradient-to-r from-rose-500 to-rose-400 rounded-full" style={{ width: `${data.fall_risk_pct}%` }}></div>
                 </div>
               </div>
 
-              <div className="space-y-1">
+              <div className="space-y-1.5">
                 <div className="flex justify-between text-[11px] font-mono">
-                  <span className="text-zinc-400">Scaffold Structure Defect</span>
-                  <span className="text-[#eab308] font-bold">{data.scaffold_defect_pct}%</span>
+                  <span className="text-slate-400">Scaffold Structure Defect</span>
+                  <span className="text-amber-400 font-bold">{data.scaffold_defect_pct}%</span>
                 </div>
-                <div className="w-full h-1.5 bg-[#141d30] rounded-full overflow-hidden">
-                  <div className="h-full bg-[#eab308] rounded-full" style={{ width: `${data.scaffold_defect_pct}%` }}></div>
+                <div className="w-full h-2 bg-[#090f1f] rounded-full overflow-hidden border border-[#1b2b4d]">
+                  <div className="h-full bg-gradient-to-r from-amber-500 to-amber-400 rounded-full" style={{ width: `${data.scaffold_defect_pct}%` }}></div>
                 </div>
               </div>
             </div>
@@ -737,12 +742,12 @@ export default function SafetyInspector({ uiState = 'results', onUpdateReport })
 
           {/* Card B: OSHA INFRACTION ANALYSIS LOG */}
           <div className="md:col-span-7 tactical-card p-4 space-y-3">
-            <div className="flex items-center justify-between pb-1 border-b border-[#1c263c]">
-              <div className="flex items-center space-x-1.5 text-zinc-300">
-                <AlertTriangle className="w-3.5 h-3.5 text-[#eab308]" />
-                <span className="font-semibold text-xs tracking-wider uppercase font-mono">OSHA INFRACTION ANALYSIS LOG</span>
+            <div className="flex items-center justify-between pb-2 border-b border-[#1c2d4f]">
+              <div className="flex items-center space-x-2 text-slate-200">
+                <AlertTriangle className="w-3.5 h-3.5 text-amber-400" />
+                <span className="font-semibold text-xs tracking-wider uppercase font-mono">OSHA Infraction Analysis Log</span>
               </div>
-              <span className="text-zinc-500 font-mono text-[11px]">{data.infractions.length} Items Flagged</span>
+              <span className="text-slate-400 font-mono text-[11px]">{data.infractions.length} Items Flagged</span>
             </div>
 
             <div className="space-y-2.5">
@@ -754,30 +759,30 @@ export default function SafetyInspector({ uiState = 'results', onUpdateReport })
                     key={inf.id}
                     onMouseEnter={() => setHoveredDetId(inf.id === 'inf-1' ? 'det-1' : 'det-3')}
                     onMouseLeave={() => setHoveredDetId(null)}
-                    className={`p-3 rounded-md space-y-1.5 transition-all cursor-pointer ${
+                    className={`p-3 rounded-lg space-y-1.5 transition duration-150 cursor-pointer ${
                       isHighlighted
                         ? inf.severity === 'CRITICAL'
                           ? 'bg-[#1b1c2b] border-2 border-rose-500 shadow-md shadow-rose-950/60 ring-1 ring-rose-500/40'
                           : 'bg-[#22201d] border-2 border-amber-400 shadow-md shadow-amber-950/60 ring-1 ring-amber-400/40'
                         : inf.severity === 'CRITICAL'
-                          ? 'bg-[#131722] border border-rose-900/40 hover:border-rose-700/60'
-                          : 'bg-[#161a24] border border-amber-900/40 hover:border-amber-700/60'
+                          ? 'bg-[#111626] border border-rose-900/40 hover:border-rose-700/60'
+                          : 'bg-[#111724] border border-amber-900/40 hover:border-amber-700/60'
                     }`}
                   >
                     <div className="flex items-center justify-between">
                       <div className="flex items-center space-x-2">
                         <span className={`px-1.5 py-0.5 rounded text-[10px] font-mono font-bold ${
                           inf.severity === 'CRITICAL'
-                            ? 'bg-rose-500/20 text-rose-400 border border-rose-500/40'
-                            : 'bg-amber-500/20 text-[#fde047] border border-amber-500/40'
+                            ? 'bg-rose-500/20 text-rose-300 border border-rose-500/40'
+                            : 'bg-amber-500/20 text-amber-300 border border-amber-500/40'
                         }`}>
                           {inf.severity}
                         </span>
-                        <span className="font-mono text-xs font-bold text-white">{inf.osha_standard}</span>
+                        <span className="font-mono text-xs font-bold text-slate-100">{inf.osha_standard}</span>
                       </div>
-                      <span className="text-[11px] font-mono text-zinc-500">{inf.location}</span>
+                      <span className="text-[11px] font-mono text-slate-400">{inf.location}</span>
                     </div>
-                    <p className="text-xs text-zinc-300 leading-relaxed">{inf.description}</p>
+                    <p className="text-xs text-slate-300 leading-relaxed">{inf.description}</p>
                   </div>
                 );
               })}
@@ -787,25 +792,25 @@ export default function SafetyInspector({ uiState = 'results', onUpdateReport })
 
         {/* Bottom Card: Recommended Actions & Corrective Protocol */}
         <div className="tactical-card p-4 space-y-3">
-          <div className="flex items-center justify-between pb-1 border-b border-[#1c263c]">
+          <div className="flex items-center justify-between pb-2 border-b border-[#1c2d4f]">
             <div className="flex items-center space-x-2">
               <span className="w-2 h-2 rounded-full bg-cyan-400"></span>
-              <span className="font-semibold text-xs tracking-wide text-white">
-                Recommended Actions & Corrective Protocol <span className="text-zinc-500 font-normal">({data.actions.length} Structured Steps)</span>
+              <span className="font-semibold text-xs tracking-wide text-slate-100">
+                Recommended Actions &amp; Corrective Protocol <span className="text-slate-400 font-normal">({data.actions.length} Structured Steps)</span>
               </span>
             </div>
-            <ChevronDown className="w-4 h-4 text-zinc-400 cursor-pointer" />
+            <ChevronDown className="w-4 h-4 text-slate-400 cursor-pointer" />
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-3 gap-3 pt-1">
             {data.actions.map((act, i) => (
-              <div key={i} className="p-3.5 rounded bg-[#0b101d] border border-[#1e2a42] space-y-1.5">
+              <div key={i} className="p-3.5 rounded-lg bg-[#090f1f] border border-[#1e2f54] hover:border-[#2b4172] transition space-y-1.5">
                 <span className={`text-[11px] font-mono font-bold block tracking-wider uppercase ${
-                  i === 0 ? 'text-rose-400' : i === 1 ? 'text-[#eab308]' : 'text-emerald-400'
+                  i === 0 ? 'text-rose-400' : i === 1 ? 'text-amber-400' : 'text-emerald-400'
                 }`}>
                   {act.step_number}. {act.category}
                 </span>
-                <p className="text-xs text-zinc-300 leading-relaxed">{act.description}</p>
+                <p className="text-xs text-slate-300 leading-relaxed">{act.description}</p>
               </div>
             ))}
           </div>
