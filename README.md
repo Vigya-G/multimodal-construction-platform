@@ -289,7 +289,7 @@ The **Multimodal Construction Intelligence Platform** is an **AI-assisted decisi
 ---
 
 ## 👤 Author & Academic Attribution
-- **Student / Developer**: Sanidhya
+- **Student / Developer**: Vigya Gupta
 - **Module**: Generative AI with Google Cloud
 - **Project**: Multimodal Construction Intelligence Platform
 - **License**: MIT
